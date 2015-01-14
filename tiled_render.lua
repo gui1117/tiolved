@@ -1,9 +1,6 @@
-local function tiled_render(maptmx)
-	local tmx_parser=love.filesystem.load("tmx_parser.lua")()
-	local map= tmx_parser(maptmx)
+local function tiled_render(map)
 	local gid={}
-	local compteur=1
-	local text=""
+	local compteur=1 -- counter
 
 	-- TRAITEMENT DES TILESETS
 	-- supposé : les tilesets sont contenus dans les premiers index de map
@@ -54,7 +51,6 @@ local function tiled_render(maptmx)
 					love.graphics.draw(gid[tonumber(l.gid)],pos.x,pos.y)
 				end
 			end
-
 			love.graphics.setCanvas()
 			table.insert(layers,couche)
 			i=i+1
@@ -63,8 +59,6 @@ local function tiled_render(maptmx)
 	end
 
 	function draw.isometric ()
-		local gap = map.height*map.tilewidth/2
-		--local angle = math.atan2(map.tileheight,map.tilewidth)
 		while map[i] and map[i].je=="layer" do
 			local layer=map[i]
 			local couche={name=layer.name,number=number,canvas=love.graphics.newCanvas((map.width+map.height)*map.tilewidth/2,(map.width+map.height)*map.tileheight/2)}
@@ -87,7 +81,6 @@ local function tiled_render(maptmx)
 					love.graphics.draw(gid[tonumber(l.gid)],ipos.x,ipos.y)
 				end
 			end
-
 			love.graphics.setCanvas()
 			table.insert(layers,couche)
 			i=i+1
