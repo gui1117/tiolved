@@ -1,4 +1,4 @@
-local function tmx_parser(name)
+function tmx_parser(name)
 	local firstline = "<%?"
 	local object = "<[^/].*/>"
 	local begintable = "<[^/].*[^/]>"
@@ -9,7 +9,7 @@ local function tmx_parser(name)
 	local xml={}
 	stack[courant]=xml
 
-	function readattribute(line)
+	local function readattribute(line)
 		local k, n, v
 		_,k,n=string.find(line, "%s(%w%w*)=")
 		if n then
@@ -21,7 +21,7 @@ local function tmx_parser(name)
 		return line,n,v
 	end
 
-	function readline(line)
+	local function readline(line)
 		local object, objectname, k
 		_,k,objectname=string.find(line, "<(%w%w*)")
 		line=string.sub(line, k+1)
@@ -36,7 +36,6 @@ local function tmx_parser(name)
 		end
 		return object
 	end
-
 
 	for line in love.filesystem.lines(name) do
 		if line == "</map>" then
@@ -53,5 +52,3 @@ local function tmx_parser(name)
 		end
 	end
 end
-
-return tmx_parser

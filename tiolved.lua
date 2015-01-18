@@ -1,29 +1,43 @@
-local function tiolved ( maptmx )
-	local tiled_render=love.filesystem.load("tiled_render.lua")()
-	local tmx_parser=love.filesystem.load("tmx_parser.lua")()
-	local map = tmx_parser(maptmx)
-	local layers=tiled_render(map)
+require ("tmx_parser")
+require ("tiled_render")
+tiolved={}
 
-	if map.orientation=="orthogonal" then
-		screentomap=function(x,y)
+tiolved.map={}
+tiolved.gid={}
+tiolved.layers={}
+tiolved.objects={}
+
+function tiolved:init(maptmx)
+	tiolved.map=tmx_parser(maptmx)
+	tiolved.gid=tiled_render:gid(tiolved.map)
+	tiolved.layers=tiled_render:layers(tiolved.map)
+
+	if tiolved.map.orientation=="orthogonal" then
+		function tiolved:toMap(x,y)
 			return x/map.tilewidth,y/map.tileheight
 		end
-		maptoscreen=function(x,y)
+		function tiolved.toRender(x,y)
 			return x*map.tilewidth,y*map.tileheight
 		end
-	elseif map.orientation=="isometric" then
-		screentomap=function(x,y)
+	elseif tiolved.map.orientation=="isometric" then
+		function tiolved:toMap(x,y)
 			local a=map.tilewidth
 			local b=map.tileheight
 			local d=1/(2*map.tilewidth*map.tileheight)
 			return d*(b*x+a*y),d*(-b*x+a*y)
 		end
-		maptoscreen=function(x,y)
+		function tiolved.toRender(x,y)
 			return (x-y)*map.tilewidth,(x+y)*map.tileheight
 		end
 	end
-
-	return {map=map,layers=layers,screentomap=screentomap,maptoscreen=maptoscreen}
 end
 
-return tiolved
+function tiolved:sort(a,b)
+
+end
+
+function tiolved:draw()--(frame)
+	for _,v in pairs(tiolved.layers) do 
+		love.graphics.draw(v.canvas)
+	end
+end
