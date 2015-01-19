@@ -27,7 +27,6 @@ end
 
 function tiled_render:layers(map)
 	local layers={}
-	local draw={}
 	local number=1
 	if map.orientation=="orthogonal" then
 		for _,v in ipairs(map) do

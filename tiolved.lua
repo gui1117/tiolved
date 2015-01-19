@@ -1,5 +1,7 @@
 require ("tmx_parser")
 require ("tiled_render")
+require ("create")
+
 tiolved={}
 
 tiolved.map={}
@@ -10,7 +12,19 @@ tiolved.objects={}
 function tiolved:init(maptmx)
 	tiolved.map=tmx_parser(maptmx)
 	tiolved.gid=tiled_render:gid(tiolved.map)
+
+	-- traitement des couche tile interpreté
+	for i,v in ipairs (tiolved.map) do
+		if v.name=="collision" then
+			create[collision](v)
+			table.remove(tiolved.map,v)
+		end
+	end
+
+	-- traitement des couches qui reste en dessin
 	tiolved.layers=tiled_render:layers(tiolved.map)
+
+	-- fonction de conversion x,y
 	local map=tiolved.map
 	local gap=map.height*map.tilewidth/2
 
@@ -34,13 +48,35 @@ function tiolved:init(maptmx)
 			return (x-y)*map.tilewidth+gap,(x+y)*map.tileheight
 		end
 	end
+
+	-- creation des objets
+	tiolved:createobjects(map)
+end
+
+function tiolved:createobjects(map)
+	for _,objectgroup in ipairs(map) do
+		if objectgroup.je=="objectgroup" then
+			for _,object in ipairs(objectgroup) do
+				local obj={}
+				for name,value in pairs(objectgroup) do
+					obj[name]=value
+				end
+				for name,value in pairs(object) do
+					obj[name]=value
+				end
+				if create[objectgroup.name] then
+					create[objectgroup.name](obj)
+				end
+			end
+		end
+	end
 end
 
 function tiolved:sort(a,b)
 
 end
 
-function tiolved:draw()--(frame)
+function tiolved:draw()
 	for _,v in pairs(tiolved.layers) do 
 		love.graphics.draw(v.canvas)
 	end
