@@ -1,6 +1,5 @@
-require ("tmx_parser")
-require ("tiled_render")
 require ("create")
+require("tiolvedParser")
 
 tiolved={}
 
@@ -10,8 +9,8 @@ tiolved.layers={}
 tiolved.objects={}
 
 function tiolved:init(maptmx)
-	tiolved.map=tmx_parser(maptmx)
-	tiolved.gid=tiled_render:gid(tiolved.map)
+	tiolved.map=tiolvedParser:map(maptmx)
+	tiolved.gid=tiolvedParser:gid(tiolved.map)
 
 	-- traitement des couche tile interpreté
 	for i,v in ipairs (tiolved.map) do
@@ -22,7 +21,7 @@ function tiolved:init(maptmx)
 	end
 
 	-- traitement des couches qui reste en dessin
-	tiolved.layers=tiled_render:layers(tiolved.map)
+	tiolved.layers=tiolvedParser:layers(tiolved.map)
 
 	-- fonction de conversion x,y
 	local map=tiolved.map
