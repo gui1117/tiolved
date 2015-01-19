@@ -9,6 +9,6 @@ function love.update(dt)
 end
 
 function love.draw()
+	love.graphics.translate(-3000,-1300)
 	tiolved:draw()
-	love.graphics.print(text)
 end
