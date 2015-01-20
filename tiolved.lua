@@ -144,17 +144,18 @@ function tiolved:layers(map)
 end
 
 function tiolved:usefulfunc(map)
+	local toMap,toRender
 	local gap=map.height*map.tilewidth/2
 
 	if map.orientation=="orthogonal" then
-		local	function toMap(x,y)
+		function toMap(x,y)
 			return x/map.tilewidth,y/map.tileheight
 		end
-		local	function toRender(x,y)
+		function toRender(x,y)
 			return x*map.tilewidth,y*map.tileheight
 		end
 	elseif map.orientation=="isometric" then
-		local	function toMap(x,y)
+		function toMap(x,y)
 			local xg=x-gap
 			local gap=map.height*map.tilewidth/2
 			local a=map.tilewidth
@@ -162,7 +163,7 @@ function tiolved:usefulfunc(map)
 			local d=1/(2*map.tilewidth*map.tileheight)
 			return d*(b*xg+a*y),d*(-b*xg+a*y)
 		end
-		local	function toRender(x,y)
+		function toRender(x,y)
 			return (x-y)*map.tilewidth+gap,(x+y)*map.tileheight
 		end
 	end
