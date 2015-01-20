@@ -1,41 +1,160 @@
-require ("create")
-require("tiolvedParser")
-
 tiolved={}
 
-tiolved.map={}
-tiolved.gid={}
-tiolved.layers={}
-tiolved.objects={}
+function tiolved:map(name)
+	local firstline = "<%?"
+	local object = "<[^/].*/>"
+	local begintable = "<[^/].*[^/]>"
+	local endtable= "</.*>"
 
-function tiolved:init(maptmx)
-	tiolved.map=tiolvedParser:map(maptmx)
-	tiolved.gid=tiolvedParser:gid(tiolved.map)
+	local stack={}
+	local courant=1
+	local xml={}
+	stack[courant]=xml
 
-	-- traitement des couche tile interpreté
-	for i,v in ipairs (tiolved.map) do
-		if v.name=="collision" then
-			create[collision](v)
-			table.remove(tiolved.map,v)
+	local function readattribute(line)
+		local k, n, v
+		_,k,n=string.find(line, "%s(%w%w*)=")
+		if n then
+			line=string.sub(line,k+1)
+			_,k=string.find(line,".\"" )
+			v=string.sub(line,2,k-1)
+			line=string.sub(line,k+1)
 		end
+		return line,n,v
 	end
 
-	-- traitement des couches qui reste en dessin
-	tiolved.layers=tiolvedParser:layers(tiolved.map)
+	local function readline(line)
+		local object, objectname, k
+		_,k,objectname=string.find(line, "<(%w%w*)")
+		line=string.sub(line, k+1)
 
-	-- fonction de conversion x,y
-	local map=tiolved.map
+		object={je=objectname}
+
+		local attr={n=nil,v=nil}
+		line,attr.n,attr.v=readattribute(line)
+		while attr.n and attr.v do
+			object[attr.n]=attr.v
+			line,attr.n,attr.v=readattribute(line)
+		end
+		return object
+	end
+
+	for line in love.filesystem.lines(name) do
+		if line == "</map>" then
+			return xml[1]
+		elseif string.find(line,firstline) then
+		elseif string.find(line,object) then
+			table.insert(stack[courant],readline(line))
+		elseif string.find(line,begintable) then
+			table.insert(stack[courant],readline(line))
+			stack[courant+1]=stack[courant][table.getn(stack[courant])]
+			courant=courant+1
+		elseif string.find(line,endtable) then
+			courant=courant-1
+		end
+	end
+end
+
+function tiolved:gid(map,rep)
+	gid={}
+	local counter=1
+	local i=1
+	while map[i].je=="tileset" do
+		local tileset=map[i]
+		tileset.image=love.graphics.newImage(rep..tileset[1].source)
+		local tileinwidth=math.floor(tileset[1].width/tileset.tilewidth)
+		local tileinheight=math.floor(tileset[1].height/tileset.tileheight)
+		for n = 1,tileinheight do
+			for m = 1,tileinwidth do
+				local quad = love.graphics.newQuad((m-1)*tileset.tilewidth,(n-1)*tileset.tileheight,tileset.tilewidth,tileset.tileheight,tileset[1].width,tileset[1].height)
+				local canvas = love.graphics.newCanvas(tileset.tilewidth,tileset.tileheight)
+				love.graphics.setCanvas (canvas)
+				love.graphics.draw(tileset.image,quad)
+				love.graphics.setCanvas()
+				gid[counter]=canvas
+				counter=counter+1
+			end
+		end
+		i=i+1
+	end
+	return gid
+end
+
+function tiolved:layers(map)
+	local layers={}
+	local number=1
+	if map.orientation=="orthogonal" then
+		for _,v in ipairs(map) do
+			if v.je=="layer" then
+				local layer={name=v.name,number=number}
+				layer.canvas=love.graphics.newCanvas(map.width*map.tilewidth,map.height*map.tileheight)
+				love.graphics.setCanvas(couche.canvas)
+				j=1
+				if v[j].je=="properties" then
+					for _,k in ipairs(v[j]) do
+						layer[k.name]=k.value
+					end
+					j=j+1
+				end
+				-- data :
+				for k,l in ipairs(v[j]) do
+					if l.gid~="0" then
+						local tileheight=gid[tonumber(l.gid)]:getHeight()
+						local pos={x=(k-1)%map.width*map.tilewidth,y=(math.ceil(k/map.width))*map.tileheight-tileheight}
+						love.graphics.draw(gid[tonumber(l.gid)],pos.x,pos.y)
+					end
+				end
+				love.graphics.setCanvas()
+				table.insert(layers,layer)
+				number=number+1
+			end
+		end
+	elseif map.orientation=="isometric" then
+		local gap=map.height*map.tilewidth/2
+		for _,v in ipairs(map) do
+			if v.je=="layer" then
+				local layer={name=v.name,number=number}
+				layer.canvas=love.graphics.newCanvas((map.width+map.height)*map.tilewidth/2,(map.width+map.height)*map.tileheight/2)
+				j=1
+				if v[j].je=="properties" then
+					for _,k in ipairs(v[j]) do
+						layer[k.name]=k.value
+					end
+					j=j+1
+				end
+				-- data :
+				love.graphics.setCanvas(layer.canvas)
+				for k,l in ipairs(v[j]) do
+					if l.gid~="0" then
+						local tileheight=gid[tonumber(l.gid)]:getHeight()
+						local pos={x=(k-1)%map.width+1,y=math.ceil(k/map.width)}
+						local ipos={}
+						ipos.x=gap+map.tilewidth/2*(pos.x-pos.y-1)
+						ipos.y=map.tileheight/2*(pos.x+pos.y-1)-tileheight
+						love.graphics.draw(gid[tonumber(l.gid)],ipos.x,ipos.y)
+					end
+				end
+				love.graphics.setCanvas()
+				table.insert(layers,layer)
+				number=number+1
+			end
+		end
+	end
+	return layers
+end
+
+function tiolved:usefulfunc(map)
 	local gap=map.height*map.tilewidth/2
 
-	if tiolved.map.orientation=="orthogonal" then
-		function tiolved:toMap(x,y)
+	if map.orientation=="orthogonal" then
+		local	function toMap(x,y)
 			return x/map.tilewidth,y/map.tileheight
 		end
-		function tiolved.toRender(x,y)
+		local	function toRender(x,y)
 			return x*map.tilewidth,y*map.tileheight
 		end
-	elseif tiolved.map.orientation=="isometric" then
-		function tiolved:toMap(x,y)
+	elseif map.orientation=="isometric" then
+		local	function toMap(x,y)
 			local xg=x-gap
 			local gap=map.height*map.tilewidth/2
 			local a=map.tilewidth
@@ -43,40 +162,10 @@ function tiolved:init(maptmx)
 			local d=1/(2*map.tilewidth*map.tileheight)
 			return d*(b*xg+a*y),d*(-b*xg+a*y)
 		end
-		function tiolved:toRender(x,y)
+		local	function toRender(x,y)
 			return (x-y)*map.tilewidth+gap,(x+y)*map.tileheight
 		end
 	end
-
-	-- creation des objets
-	tiolved:createobjects(map)
+	return toMap,toRender
 end
 
-function tiolved:createobjects(map)
-	for _,objectgroup in ipairs(map) do
-		if objectgroup.je=="objectgroup" then
-			for _,object in ipairs(objectgroup) do
-				local obj={}
-				for name,value in pairs(objectgroup) do
-					obj[name]=value
-				end
-				for name,value in pairs(object) do
-					obj[name]=value
-				end
-				if create[objectgroup.name] then
-					create[objectgroup.name](obj)
-				end
-			end
-		end
-	end
-end
-
-function tiolved:sort(a,b)
-
-end
-
-function tiolved:draw()
-	for _,v in pairs(tiolved.layers) do 
-		love.graphics.draw(v.canvas)
-	end
-end
