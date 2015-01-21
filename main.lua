@@ -18,7 +18,7 @@ function love.load()
 	-- rendering of drawned layers
 	layers=tiolved:layers(map,gid)
 	-- useful function
-	toMap,toRender=tiolved:usefulfunc(map)
+	toMap,toRender=tiolved:usefulfunc(map,gid)
 
 	-- creation of objects
 	for _,objectgroup in ipairs(map) do

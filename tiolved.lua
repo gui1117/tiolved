@@ -110,7 +110,16 @@ function tiolved:layers(map,gid)
 			end
 		end
 	elseif map.orientation=="isometric" then
-		local gap=map.height*map.tilewidth/2
+		local gapx=(map.height-1)*map.tilewidth/2
+		local gapy=0
+		for _,canvas in ipairs(gid) do
+			local height=canvas:getHeight()
+			if height>gapy then 
+				gapy=height
+			end
+		end
+		gapy=gapy-map.tileheight
+
 		for _,v in ipairs(map) do
 			if v.je=="layer" then
 				local layer={name=v.name,number=number}
@@ -129,8 +138,8 @@ function tiolved:layers(map,gid)
 						local tileheight=gid[tonumber(l.gid)]:getHeight()
 						local pos={x=(k-1)%map.width+1,y=math.ceil(k/map.width)}
 						local ipos={}
-						ipos.x=gap+map.tilewidth/2*(pos.x-pos.y-1)
-						ipos.y=map.tileheight/2*(pos.x+pos.y-1)-tileheight
+						ipos.x=gapx+map.tilewidth/2*(pos.x-pos.y)
+						ipos.y=gapy+map.tileheight/2*(pos.x+pos.y)-tileheight
 						love.graphics.draw(gid[tonumber(l.gid)],ipos.x,ipos.y)
 					end
 				end
@@ -143,9 +152,8 @@ function tiolved:layers(map,gid)
 	return layers
 end
 
-function tiolved:usefulfunc(map)
+function tiolved:usefulfunc(map,gid)
 	local toMap,toRender
-	local gap=map.height*map.tilewidth/2
 
 	if map.orientation=="orthogonal" then
 		function toMap(x,y)
@@ -155,16 +163,26 @@ function tiolved:usefulfunc(map)
 			return x*map.tilewidth,y*map.tileheight
 		end
 	elseif map.orientation=="isometric" then
+		local gapx=map.height*map.tilewidth/2
+		local gapy=0
+		for _,canvas in ipairs(gid) do
+			local height=canvas:getHeight()
+			if height>gapy then 
+				gapy=height
+			end
+		end
+		gapy=gapy-map.tileheight
+
 		function toMap(x,y)
-			local xg=x-gap
-			local gap=map.height*map.tilewidth/2
-			local a=map.tilewidth
-			local b=map.tileheight
-			local d=1/(2*map.tilewidth*map.tileheight)
-			return d*(b*xg+a*y),d*(-b*xg+a*y)
+			local xg=x-gapx
+			local yg=y-gapy
+			local a=map.tilewidth/2
+			local b=map.tileheight/2
+			local d=2/(map.tilewidth*map.tileheight)
+			return d*(b*xg+a*yg),d*(-b*xg+a*yg)
 		end
 		function toRender(x,y)
-			return (x-y)*map.tilewidth+gap,(x+y)*map.tileheight
+			return (x-y)*map.tilewidth/2+gapx,(x+y)*map.tileheight/2+gapy
 		end
 	end
 	return toMap,toRender
