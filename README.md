@@ -11,6 +11,7 @@ You can create a table that contain all the element in a .tmx file by using `map
 	maptable=tiolved:map("map.tmx")
 
 the table is generated as below :
+
 * object :
 
 	<element attribute1="value1" attribute2="value2"/> 
