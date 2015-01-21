@@ -80,7 +80,7 @@ function tiolved:gid(map,rep)
 	return gid
 end
 
-function tiolved:layers(map)
+function tiolved:layers(map,gid)
 	local layers={}
 	local number=1
 	if map.orientation=="orthogonal" then
