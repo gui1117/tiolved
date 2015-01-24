@@ -88,7 +88,7 @@ function tiolved:layers(map,gid)
 			if v.je=="layer" then
 				local layer={name=v.name,number=number}
 				layer.canvas=love.graphics.newCanvas(map.width*map.tilewidth,map.height*map.tileheight)
-				love.graphics.setCanvas(couche.canvas)
+				love.graphics.setCanvas(layer.canvas)
 				j=1
 				if v[j].je=="properties" then
 					for _,k in ipairs(v[j]) do

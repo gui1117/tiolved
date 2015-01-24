@@ -1,1 +1,4 @@
 tileset modified a little from amstrad one at opengameart.org who modified a tileset from the game flare under cc-by-sa 3.0
+
+image isometrique.png http://hpics.li/2c4ab52
+image orthogonal.png http://hpics.li/5ddadf6

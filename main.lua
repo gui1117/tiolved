@@ -2,7 +2,7 @@ require ("tiolved")
 
 function love.load()
 	-- parsering tmx file
-	map=tiolved:map("source/isometric.tmx")
+	map=tiolved:map("source/orthogonal.tmx")
 
 	-- creation of the gid
 	gid=tiolved:gid(map,"source/")
@@ -42,6 +42,10 @@ function love.update(dt)
 	y=love.mouse:getY()
 	xmap,ymap=toMap(x,y)
 	xrender,yrender=toRender(xmap,ymap)
+
+	if love.keyboard.isDown("escape") then
+		love.event.quit()
+	end
 end
 
 function love.draw()
