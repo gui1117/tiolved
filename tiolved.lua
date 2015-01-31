@@ -56,34 +56,58 @@ function tiolved:map(name)
 end
 
 function tiolved:gid(map,rep)
+	love.graphics.setBlendMode("replace")
 	gid={}
 	local counter=1
 	local i=1
-	while map[i].je=="tileset" do
-		local tileset=map[i]
-		tileset.image=love.graphics.newImage(rep..tileset[1].source)
-		local tileinwidth=math.floor(tileset[1].width/tileset.tilewidth)
-		local tileinheight=math.floor(tileset[1].height/tileset.tileheight)
-		for n = 1,tileinheight do
-			for m = 1,tileinwidth do
-				local quad = love.graphics.newQuad((m-1)*tileset.tilewidth,(n-1)*tileset.tileheight,tileset.tilewidth,tileset.tileheight,tileset[1].width,tileset[1].height)
-				local canvas = love.graphics.newCanvas(tileset.tilewidth,tileset.tileheight)
-				love.graphics.setCanvas (canvas)
-				love.graphics.draw(tileset.image,quad)
-				love.graphics.setCanvas()
-				gid[counter]=canvas
-				counter=counter+1
+	for i,_ in ipairs(map) do
+		if map[i].je=="tileset" then
+			local tileset=map[i]
+			tileset.image=love.graphics.newImage(rep..tileset[1].source)
+			local tileinwidth=math.floor(tileset[1].width/tileset.tilewidth)
+			local tileinheight=math.floor(tileset[1].height/tileset.tileheight)
+			for n = 1,tileinheight do
+				for m = 1,tileinwidth do
+					gid[counter]={}
+					local quad = love.graphics.newQuad((m-1)*tileset.tilewidth,(n-1)*tileset.tileheight,tileset.tilewidth,tileset.tileheight,tileset[1].width,tileset[1].height)
+					local canvas = love.graphics.newCanvas(tileset.tilewidth,tileset.tileheight)
+					love.graphics.setCanvas (canvas)
+					love.graphics.draw(tileset.image,quad)
+					love.graphics.setCanvas()
+					gid[counter].canvas=canvas
+					counter=counter+1
+				end
 			end
+
+			for _,t in ipairs(tileset) do
+				if t.je=="tile" then
+					for _,k in ipairs(t) do
+						local g=gid[tonumber(t.id)]
+						if k.je=="animation" then
+							g.animation={}
+							for _,a in ipairs(k) do
+								table.insert(g.animation,{tileid=a.tileid,duration=a.duration})
+							end
+						elseif k.je=="properties" then
+							for _,p in ipairs(k) do
+								g[p.name]=p.value
+							end
+						end
+					end
+				end
+			end
+
+			i=i+1
 		end
-		i=i+1
 	end
+	love.graphics.setBlendMode("alpha")
 	return gid
 end
 
 function tiolved:layers(map,gid)
 	local layers={}
 	local number=1
-	if map.orientation=="orthogonal" then
+	if map.orientation=="orthogonal" then -- surement un probleme pour des tile trop grand
 		for _,v in ipairs(map) do
 			if v.je=="layer" then
 				local layer={name=v.name,number=number}
@@ -99,9 +123,9 @@ function tiolved:layers(map,gid)
 				-- data :
 				for k,l in ipairs(v[j]) do
 					if l.gid~="0" then
-						local tileheight=gid[tonumber(l.gid)]:getHeight()
+						local tileheight=gid[tonumber(l.gid)].canvas:getHeight()
 						local pos={x=(k-1)%map.width*map.tilewidth,y=(math.ceil(k/map.width))*map.tileheight-tileheight}
-						love.graphics.draw(gid[tonumber(l.gid)],pos.x,pos.y)
+						love.graphics.draw(gid[tonumber(l.gid)].canvas,pos.x,pos.y)
 					end
 				end
 				love.graphics.setCanvas()
@@ -112,8 +136,8 @@ function tiolved:layers(map,gid)
 	elseif map.orientation=="isometric" then
 		local gapx=(map.height-1)*map.tilewidth/2
 		local gapy=0
-		for _,canvas in ipairs(gid) do
-			local height=canvas:getHeight()
+		for _,g in ipairs(gid) do
+			local height=g.canvas:getHeight()
 			if height>gapy then 
 				gapy=height
 			end
@@ -135,12 +159,12 @@ function tiolved:layers(map,gid)
 				love.graphics.setCanvas(layer.canvas)
 				for k,l in ipairs(v[j]) do
 					if l.gid~="0" then
-						local tileheight=gid[tonumber(l.gid)]:getHeight()
+						local tileheight=gid[tonumber(l.gid)].canvas:getHeight()
 						local pos={x=(k-1)%map.width+1,y=math.ceil(k/map.width)}
 						local ipos={}
 						ipos.x=gapx+map.tilewidth/2*(pos.x-pos.y)
 						ipos.y=gapy+map.tileheight/2*(pos.x+pos.y)-tileheight
-						love.graphics.draw(gid[tonumber(l.gid)],ipos.x,ipos.y)
+						love.graphics.draw(gid[tonumber(l.gid)].canvas,ipos.x,ipos.y)
 					end
 				end
 				love.graphics.setCanvas()
@@ -165,8 +189,8 @@ function tiolved:usefulfunc(map,gid)
 	elseif map.orientation=="isometric" then
 		local gapx=map.height*map.tilewidth/2
 		local gapy=0
-		for _,canvas in ipairs(gid) do
-			local height=canvas:getHeight()
+		for _,g in ipairs(gid) do
+			local height=g.canvas:getHeight()
 			if height>gapy then 
 				gapy=height
 			end
@@ -187,4 +211,3 @@ function tiolved:usefulfunc(map,gid)
 	end
 	return toMap,toRender
 end
-

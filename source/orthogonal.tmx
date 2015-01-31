@@ -27,6 +27,12 @@
   <tile id="29" terrain="2,0,2,0"/>
   <tile id="30" terrain="4,4,4,4"/>
   <tile id="31" terrain="4,4,4,4"/>
+  <tile id="35">
+   <properties>
+    <property name="arg1" value="spawn"/>
+    <property name="nom" value="character"/>
+   </properties>
+  </tile>
   <tile id="36">
    <objectgroup draworder="index"/>
   </tile>
