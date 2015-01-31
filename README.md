@@ -43,9 +43,9 @@ You can create a table that contain all the tile in canvas with the mapTable usi
 
 	mapGid=tiolved:gid(mapTable)
 
-mapGid[1]=tile1
+mapGid[1]={canvas=tile1,animation(if any)={{tileid="20",duration="100"},{tileid="21",duration="100"}},properties[1].name=properties[1].value...}
 ...
-mapGid[lastTile]=lastTile
+mapGid[1]={canvas=lasttile,animation(if any)={{tileid="20",duration="100"},{tileid="21",duration="100"}},properties[1].name=properties[1].value...}
 
 layers
 ------
