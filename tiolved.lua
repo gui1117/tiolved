@@ -82,11 +82,11 @@ function tiolved:gid(map,rep)
 			for _,t in ipairs(tileset) do
 				if t.je=="tile" then
 					for _,k in ipairs(t) do
-						local g=gid[tonumber(t.id)]
+						local g=gid[tonumber(t.id)+tonumber(tileset.firstgid)]
 						if k.je=="animation" then
 							g.animation={}
 							for _,a in ipairs(k) do
-								table.insert(g.animation,{tileid=a.tileid,duration=a.duration})
+								table.insert(g.animation,{tileid=a.tileid+tileset.firstgid,duration=a.duration})
 							end
 						elseif k.je=="properties" then
 							for _,p in ipairs(k) do
@@ -98,6 +98,15 @@ function tiolved:gid(map,rep)
 			end
 
 			i=i+1
+		end
+	end
+	for _,g in ipairs(gid) do
+		if g.animation then
+			for _,v in ipairs(g.animation) do
+				v.canvas=gid[tonumber(v.tileid)].canvas
+				v.duration=tonumber(v.duration)
+				v.tileid=nil
+			end
 		end
 	end
 	love.graphics.setBlendMode("alpha")
