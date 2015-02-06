@@ -2,6 +2,7 @@ tiolved.lua
 ===========
 
 A framework to use [tiled](http://www.mapeditor.org/) in [LÖVE](http://love2d.org).
+Note that it doesn't use the lua export in tiled, stupid ? yes, I wasn't aware of it.
 
 mapTable
 -------- 
