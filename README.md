@@ -79,3 +79,14 @@ issue
 -----
 
 for any inform me at my [github](https://github.com/thiolliere/tiolved)
+
+to do
+-----
+* create maptable from .tmx file allow to use save and not export, it may be kept
+* canvas must be drawned with linear approximation or not.
+* mapGid attribute such as tile id in animation must be a number and not a string idem duration
+* Isometric must be tested
+* animated layer implementation
+* order of drawned layer must be implemented as a z attribute
+* for orthogonal useful function must be divided in toRender(x) and to Render(y)
+* think about spritebatch
