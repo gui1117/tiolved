@@ -75,6 +75,7 @@ function tiolved:gid(map,rep)
 					love.graphics.draw(tileset.image,quad)
 					love.graphics.setCanvas()
 					gid[counter].canvas=canvas
+					gid[counter].id=counter
 					counter=counter+1
 				end
 			end
