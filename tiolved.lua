@@ -124,7 +124,7 @@ end
 -- tileset is an object that contain the canvas of each tile, a table of animated tile and a table of tile to draw (batch)
 -- it has 3 mathods : update, draw, and add
 -- update changes the canvas of tile that are animated
--- add adds a tile to draw
+-- add adds a tile to draw at a certain height
 -- draw draws tiles and clean the batch
 function tiolved:tileset(gid,map)
 	local tileset={

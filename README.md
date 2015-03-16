@@ -1,6 +1,9 @@
 tiolved.lua
 ===========
 
+THIS README IS NOT UP−TO−DATE, sorry, I just added spritebatch and animation,
+the documentation will be made up soon. With new feature ... In a month probably
+
 A framework to use [tiled](http://www.mapeditor.org/) in [LÖVE](http://love2d.org).
 Note that it doesn't use the lua export of tiled, stupid ? yes, I wasn't aware of it.
 
@@ -35,7 +38,7 @@ the table is generated as below :
 			2={je="element1.2", attr1="value1"}
 		}
 
-* the first line `<?xml version="1.0" encoding="UTF-8"?>` create nothing
+* the first line `<?xml version="1.0" encoding="UTF-8"?>` creates nothing
 
 mapGid
 ------
@@ -85,7 +88,7 @@ to do
 * create maptable from .tmx file allow to use save and not export, it may be kept
 * canvas must be drawned with linear approximation or not.
 * mapGid attribute such as tile id in animation must be a number and not a string idem duration
-* Isometric must be tested
+* Isometric must be done
 * animated layer implementation
 * order of drawned layer must be implemented as a z attribute
 * for orthogonal useful function must be divided in toRender(x) and to Render(y)
