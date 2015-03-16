@@ -56,16 +56,21 @@ function tiolved:map(name)
 	end
 end
 
--- gid is a result of tileset information it will be used temporaly to create the true tileset
+-- array of table that contain
+-- canvas of the tile
+-- properties
+-- identifiers ( absolute like noted in layers )
+-- animation : array of {tileid,duration}
+-- I use it locally to gather information
 function tiolved:gid(map,rep)
 	-- save the previous blendmode because tile are drawned in "replace" mode in orderto keep alpha and note having a mixe with black
 	local previousblendmode=love.graphics.getBlendMode()
 	love.graphics.setBlendMode("replace")
 	local gid={}
-	-- counter count the tile in gid
+	-- counter counts the tile in gid 
+	-- identical to absolute identifier
 	local counter=1
 	for _,m in ipairs(map) do
-		-- interprate only from tileset table
 		if m.je=="tileset" then
 			local tileset=m
 			-- import the image of the tileset in the repertory indicated
@@ -75,9 +80,9 @@ function tiolved:gid(map,rep)
 			local tileinheight=math.floor(tileset[1].height/tileset.tileheight)
 			for n = 1,tileinheight do
 				for m = 1,tileinwidth do
-					-- the information of each tile are going in the table
-					gid[counter]={}
-					-- create a quad that take only the part of image that fits the tile
+					-- the information of each tile are going in this table
+					gid[counter]={id=counter}
+					-- the quad of the part of the image correspondant to the tile
 					local quad = love.graphics.newQuad((m-1)*tileset.tilewidth,(n-1)*tileset.tileheight,tileset.tilewidth,tileset.tileheight,tileset[1].width,tileset[1].height)
 					-- create the canvas that will contain the tile
 					local canvas = love.graphics.newCanvas(tileset.tilewidth,tileset.tileheight)
@@ -86,26 +91,24 @@ function tiolved:gid(map,rep)
 					love.graphics.draw(tileset.image,quad)
 					love.graphics.setCanvas()
 					
-					-- each tile have a canvas and and absolute identifier
 					gid[counter].canvas=canvas
-					gid[counter].id=counter
 					counter=counter+1
 				end
 			end
 
-			-- interpretation of some information in the tileset : properties and animation of tiles
+			-- parse properties and aniation
 			for _,t in ipairs(tileset) do
 				if t.je=="tile" then
 					for _,k in ipairs(t) do
 						-- calculation of the identifier of the tile
 						local l=tonumber(t.id)+tonumber(tileset.firstgid)
-						-- saving of the animation
+						-- animation
 						if k.je=="animation" then
 							gid[l].animation={}
 							for _,a in ipairs(k) do
 								table.insert(gid[l].animation,{tileid=tonumber(a.tileid)+tonumber(tileset.firstgid),duration=tonumber(a.duration)})
 							end
-						-- saving of properties
+						-- properties
 						elseif k.je=="properties" then
 							for _,p in ipairs(k) do
 								gid[l][p.name]=p.value
@@ -126,6 +129,27 @@ end
 -- update changes the canvas of tile that are animated
 -- add adds a tile to draw at a certain height
 -- draw draws tiles and clean the batch
+--
+--
+-- tileset is a complex table :
+-- {
+-- 	animated={
+-- 		nexttime
+-- 		current
+-- 		1={canvas,duration}
+-- 		2={canvas,duration}
+-- 	}
+-- 	batch={}
+-- 	batch[12]={}
+-- 	batch[12][16]=spritebatch <-- the tile 16 must be drawn at height z=12
+--	1=canvas-of-first-tile
+--	2=canvas-of-second-tile
+--	last=canvas-of-last-tile
+--}
+-- with 3 methods :
+-- update(dt) : change the canvas of animated tile
+-- add( z, id, x, y, z, .. , kx, ky) : add a sprite in batch[z][id]
+-- draw() : draw and clear all spritebatch
 function tiolved:tileset(gid,map)
 	local tileset={
 		animated={},
@@ -151,7 +175,6 @@ function tiolved:tileset(gid,map)
 	function tileset:update(dt)
 		time=time+dt
 		for _,t in ipairs(self.animated) do
-			debug="    next="..t.nexttime.." dur="..t[t.current].duration.." cur="..t.current.." time="..time
 			while time >= t.nexttime do
 				t.nexttime=t.nexttime+t[t.current].duration
 				t.current=t.current % table.getn(t) +1
@@ -181,6 +204,19 @@ function tiolved:tileset(gid,map)
 	return tileset
 end
 
+-- layers is a table with :
+-- 	an array of layer
+-- 	draw : function that call all layer.draw
+-- layer is a table with :
+-- 	name 
+-- 	number ( order in tiled )
+-- 	tile = { 	
+-- 		{id,x,y} 
+-- 		{id,x,y}
+-- 	}
+-- 	property1=value1
+-- 	property2=value2
+-- 	draw ( function that add tile in tileset batch )
 function tiolved:layers(map,tileset)
 	local layers={}
 	local number=1
@@ -227,14 +263,17 @@ function tiolved:layers(map,tileset)
 		end
 	elseif map.orientation=="isometric" then
 	end
-	function layers.draw()
-		for _,v in ipairs(layers) do
+	function layers:draw()
+		for _,v in ipairs(self) do
 			v.draw()
 		end
 	end
 	return layers
 end
 
+-- two functions : toMap and toRender
+-- map coordinate are : 1 tile measure 1*1
+-- render coordinate are : 1 tile measure Xpixel*Ypixel
 function tiolved:usefulfunc(map)
 	local toMap,toRender
 

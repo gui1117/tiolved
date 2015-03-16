@@ -2,15 +2,15 @@ require ("tiolved")
 
 function love.load()
 	-- parsering tmx file
-	map=tiolved:map("source/orthogonal.tmx")
+	local map=tiolved:map("source/orthogonal.tmx")
 
 	-- creation of the gid
-	gid=tiolved:gid(map,"source/")
+	local gid=tiolved:gid(map,"source/")
 
 	tileset=tiolved:tileset(gid,map)
 
 	-- interpretation of interpreted layers
-	toremove={}
+	local toremove={} -- you must not remove in an array while looping in it
 	for i,v in ipairs (map) do
 		if v.name=="collision" then
 			-- create[collision](v)
@@ -45,11 +45,7 @@ end
 
 function love.update(dt)
 	tileset:update(dt)
-	for _,l in ipairs(layers) do
-		for _,m in ipairs(l) do
-			tileset:add(m[1],m[2],m[3],m[4])
-		end
-	end
+
 	x=love.mouse:getX()
 	y=love.mouse:getY()
 	xmap,ymap=toMap(x,y)
@@ -61,18 +57,11 @@ function love.update(dt)
 end
 
 function love.draw()
-	layers.draw()
+	layers:draw() -- must be call before tileset:draw()
 	tileset:draw()
-	love.graphics.print("x="..x..", y="..y.."\nxmap="..xmap..", ymap="..ymap.."\nxrender="..xrender..", yrender="..yrender)
-	local m="\n\n\n\n\n"
-	for i,v in ipairs(tileset.batch) do
-		m=m.." "..i.." "..type(v)
-		if v[116] then m=m.." "..v[116]:type() end
-		for j,k in ipairs(tileset.batch[i]) do
-			m=m.." "..j.."!!!!"
-			love.graphics.draw(k)
-		end
-	end
-	m=m..debug
-	love.graphics.print(m)
+	love.graphics.print(
+		"x="..x..", y="..y..
+		"\nxmap="..xmap..", ymap="..ymap..
+		"\nxrender="..xrender..", yrender="..yrender
+	)
 end
