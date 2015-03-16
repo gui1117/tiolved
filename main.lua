@@ -7,18 +7,24 @@ function love.load()
 	-- creation of the gid
 	gid=tiolved:gid(map,"source/")
 
+	tileset=tiolved:tileset(gid,map)
+
 	-- interpretation of interpreted layers
+	toremove={}
 	for i,v in ipairs (map) do
 		if v.name=="collision" then
 			-- create[collision](v)
-			table.remove(map,i)
+			table.insert(toremove,i)
 		end
+	end
+	for _,v in ipairs(toremove) do
+		table.remove(map,v)
 	end
 
 	-- rendering of drawned layers
-	layers=tiolved:layers(map,gid)
+	layers=tiolved:layers(map,tileset)
 	-- useful function
-	toMap,toRender=tiolved:usefulfunc(map,gid)
+	toMap,toRender=tiolved:usefulfunc(map)
 
 	-- creation of objects
 	for _,objectgroup in ipairs(map) do
@@ -38,6 +44,12 @@ function love.load()
 end
 
 function love.update(dt)
+	tileset:update(dt)
+	for _,l in ipairs(layers) do
+		for _,m in ipairs(l) do
+			tileset:add(m[1],m[2],m[3],m[4])
+		end
+	end
 	x=love.mouse:getX()
 	y=love.mouse:getY()
 	xmap,ymap=toMap(x,y)
@@ -49,8 +61,18 @@ function love.update(dt)
 end
 
 function love.draw()
-	for _,v in pairs(layers) do 
-		love.graphics.draw(v.canvas)
-	end
+	layers.draw()
+	tileset:draw()
 	love.graphics.print("x="..x..", y="..y.."\nxmap="..xmap..", ymap="..ymap.."\nxrender="..xrender..", yrender="..yrender)
+	local m="\n\n\n\n\n"
+	for i,v in ipairs(tileset.batch) do
+		m=m.." "..i.." "..type(v)
+		if v[116] then m=m.." "..v[116]:type() end
+		for j,k in ipairs(tileset.batch[i]) do
+			m=m.." "..j.."!!!!"
+			love.graphics.draw(k)
+		end
+	end
+	m=m..debug
+	love.graphics.print(m)
 end
