@@ -82,6 +82,7 @@ and three methods
 to understand better here is the structure of tileset :
 
 A complex table :
+
 		{
 	 		animated={
 		 		nexttime
