@@ -138,8 +138,8 @@ Use :
 
 ``` toMap,toRender=tiolved:usefulfunc(map) ```
 
-map coordinate are : 1 tile measure 1*1
-render coordinate are : 1 tile measure Xpixel*Ypixel
+* map coordinate are : 1 tile measure 1*1
+* render coordinate are : 1 tile measure Xpixel*Ypixel
 
 exemple
 -------
