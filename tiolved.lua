@@ -142,6 +142,11 @@ end
 -- 	batch={}
 -- 	batch[12]={}
 -- 	batch[12][16]=spritebatch <-- the tile 16 must be drawn at height z=12
+-- 	z={
+-- 		5, <-- the z height ordered ( used for drawing in order)
+-- 		125,
+-- 		...
+-- 	}
 --	1=canvas-of-first-tile
 --	2=canvas-of-second-tile
 --	last=canvas-of-last-tile
@@ -153,7 +158,8 @@ end
 function tiolved:tileset(gid,map)
 	local tileset={
 		animated={},
-		batch={}
+		batch={},
+		z={}
 	}
 	for i,g in ipairs(gid) do
 		if g.animation then
@@ -177,7 +183,7 @@ function tiolved:tileset(gid,map)
 		for _,t in ipairs(self.animated) do
 			while time >= t.nexttime do
 				t.nexttime=t.nexttime+t[t.current].duration
-				t.current=t.current % table.getn(t) +1
+				t.current=t.current % table.getn(t) + 1
 				t.canvas=t[t.current].canvas
 				for _,v in pairs(self.batch) do
 					if v[t.id] then 
@@ -189,13 +195,17 @@ function tiolved:tileset(gid,map)
 	end
 	local size=map.width*map.tilewidth,map.height*map.tileheight
 	function tileset:add(z,id,x, y, r, sx, sy, ox, oy, kx, ky )
-		if not self.batch[z] then self.batch[z]={} end
+		if not self.batch[z] then 
+			self.batch[z]={} 
+			table.insert(self.z,z)
+			table.sort(self.z)
+		end
 		if not self.batch[z][id] then self.batch[z][id]=love.graphics.newSpriteBatch(self[id],size) end
 		self.batch[z][id]:add(x, y, r, sx, sy, ox, oy, kx, ky )
 	end
 	function tileset:draw()
-		for _,v in pairs(self.batch) do
-			for _,k in pairs(v) do
+		for _,v in ipairs(self.z) do
+			for _,k in pairs(self.batch[v]) do
 				love.graphics.draw(k,0,0)
 				k:clear()
 			end

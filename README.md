@@ -93,6 +93,11 @@ A complex table :
 		 	batch={}
 		 	batch[12]={}
 		 	batch[12][16]=spritebatch <-- the tile 16 must be drawn at height z=12
+		 	z={
+ 				5, <-- the z height ordered ( used for drawing in order)
+ 				125,
+ 				...
+ 			}
 			1=canvas-of-first-tile
 			2=canvas-of-second-tile
 			last=canvas-of-last-tile
@@ -101,7 +106,7 @@ A complex table :
 the three properties :
 
 		 update(dt) : change the canvas of animated tile and the texture of sripteBatch of the tile
-		 add( z, id, x, y, z, .. , kx, ky) : add a sprite in batch[z][id]
+		 add( z, id, x, y, z, .. , kx, ky) : add a sprite in batch[z][id] and the z in z table if not already there
 		 draw() : draw and clear all spritebatch
 
 layers
