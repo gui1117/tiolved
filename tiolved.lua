@@ -172,9 +172,13 @@ function tiolved:tileset(gid,map)
 					table.insert(anim,{canvas=gid[v.tileid].canvas,duration=v.duration/1000})
 				end
 			end
-			anim.nexttime=anim[1].duration
-			table.insert(tileset.animated,anim)
-			tileset[i]=anim[1].canvas
+			if anim[1] then
+				anim.nexttime=anim[1].duration
+				table.insert(tileset.animated,anim)
+				tileset[i]=anim[1].canvas
+			else
+				tileset[i]=g.canvas
+			end
 		else
 			tileset[i]=g.canvas
 		end
