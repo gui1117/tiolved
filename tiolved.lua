@@ -168,7 +168,9 @@ function tiolved:tileset(gid,map)
 				current=1
 			}
 			for k,v in ipairs(g.animation) do
-				table.insert(anim,{canvas=gid[v.tileid].canvas,duration=v.duration/1000})
+				if v.duration ~=0 then
+					table.insert(anim,{canvas=gid[v.tileid].canvas,duration=v.duration/1000})
+				end
 			end
 			anim.nexttime=anim[1].duration
 			table.insert(tileset.animated,anim)
