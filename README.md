@@ -3,6 +3,8 @@ Tiölved.lua
 
 A library to use [Tiled](http://www.mapeditor.org/) in [LÖVE](http://love2d.org).
 
+A basic use is described in the main.lua
+
 It provide 3 objects and 2 functions :
 
 mapTable
@@ -158,7 +160,7 @@ for any inform me at my [github](https://github.com/thiolliere/tiolved)
 
 to do
 -----
-* create maptable from .tmx file allow to use save and not export, it may be kept
-* canvas must be drawned with linear approximation or not.
-* Isometric must be done
+* create maptable from .tmx file allow to use save instead of export, it may be kept
+* canvas must be drawned with linear approximation or not. No, use love.graphics.setDefaultFilter.
+* Isometric must be done, so it changes the tileset structure because tile must be drawned from up left to down right.
 * for orthogonal useful function must be divided in toRender(x) and to Render(y)
