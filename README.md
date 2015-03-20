@@ -1,7 +1,7 @@
-tiolved.lua
+Tiölved.lua
 ===========
 
-A framework to use [tiled](http://www.mapeditor.org/) in [LÖVE](http://love2d.org).
+A library to use [Tiled](http://www.mapeditor.org/) in [LÖVE](http://love2d.org).
 
 It provide 3 objects and 2 functions :
 
