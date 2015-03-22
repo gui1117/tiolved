@@ -1,8 +1,10 @@
 require ("tiolved")
 
 function love.load()
+	local t=love.timer.getTime()
 	-- parsering tmx file to a lua table
 	local map=tiolved:map("source/orthogonal.tmx")
+	tloadmap=" time to load map="..love.timer.getTime()-t
 
 	-- creation of the gid, a local object full of data
 	local gid=tiolved:gid(map,"source/")
@@ -68,6 +70,7 @@ function love.draw()
 	love.graphics.print(
 		"x="..x..", y="..y..
 		"\nxmap="..xmap..", ymap="..ymap..
-		"\nxrender="..xrender..", yrender="..yrender
+		"\nxrender="..xrender..", yrender="..yrender..
+		"\n"..tloadmap
 	)
 end
