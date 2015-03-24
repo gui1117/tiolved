@@ -5,7 +5,7 @@ A library to use [Tiled](http://www.mapeditor.org/) in [LÖVE](http://love2d.org
 
 A basic use is described in the main.lua
 
-It provide 3 objects and 2 functions :
+It provide 3 objects and 4 functions :
 
 mapTable
 -------- 
@@ -39,6 +39,21 @@ It returns a table generated as below :
 		}
 
 * the first line `<?xml version="1.0" encoding="UTF-8"?>` creates nothing
+
+store/load
+----------
+
+Create a map from a .tmx file when using a compressed .love can take lots of time
+
+``` 
+tiolved.store(map,filname) 
+``` 
+write the lua table in a file
+``` 
+tiolved.load(map)
+```
+return the map stored
+
 
 mapGid
 ------

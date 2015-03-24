@@ -1,3 +1,5 @@
+dofile("saveTableToFile.lua")
+
 tiolved={}
 
 -- it create from xml file a table
@@ -54,6 +56,14 @@ function tiolved:map(name)
 			courant=courant-1
 		end
 	end
+end
+
+-- store the map table a file
+function tiolved.store(map,filename)
+	return table.save(map,filename)
+end
+function tiolved.load(filename)
+	return table.load(filename)
 end
 
 -- array of table that contain

@@ -1619,7 +1619,7 @@
    <tile gid="0"/>
   </data>
  </layer>
- <layer name="collision" width="20" height="20" visible="0">
+ <layer name="collision" width="20" height="20">
   <data>
    <tile gid="0"/>
    <tile gid="0"/>
