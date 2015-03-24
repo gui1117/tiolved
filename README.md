@@ -50,7 +50,7 @@ tiolved.store(map,filname)
 ``` 
 write the lua table in a file
 ``` 
-tiolved.load(map)
+map=tiolved.load(filename)
 ```
 return the map stored
 
