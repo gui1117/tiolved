@@ -5,55 +5,7 @@ A library to use [Tiled](http://www.mapeditor.org/) in [LÖVE](http://love2d.org
 
 A basic use is described in the main.lua
 
-It provide 3 objects and 4 functions :
-
-mapTable
--------- 
-
-You can create a table that contain all the element of a .tmx file by using 
-
-``` mapTable=tiolved:map(relative-or-absolute-name.tmx) ```
-
-It returns a table generated as below :
-
-* object :
-
-		<element attribute1="value1" attribute2="value2"/> 
-
- create :
-
- 		{je="element", attribute1="value1", attribute2="value2"}
-
-* object that contain objects :
-
-		<element1 attr1="value1">
-			<element1.1 attr1="value1"/>
-			<element1.2 attr1="value1"/>
-		</element>
-
-   create :
-
-		{je="element", attr1="value1",
-			1={je="element1.1", attr1="value1"}
-			2={je="element1.2", attr1="value1"}
-		}
-
-* the first line `<?xml version="1.0" encoding="UTF-8"?>` creates nothing
-
-store/load
-----------
-
-Create a map from a .tmx file when using a compressed .love can take lots of time
-
-``` 
-tiolved.store(map,filname) 
-``` 
-write the lua table in a file
-``` 
-map=tiolved.load(filename)
-```
-return the map stored
-
+It provide 3 objects and 2 functions :
 
 mapGid
 ------
@@ -175,7 +127,5 @@ for any inform me at my [github](https://github.com/thiolliere/tiolved)
 
 to do
 -----
-* create maptable from .tmx file allow to use save instead of export, it may be kept
-* canvas must be drawned with linear approximation or not. No, use love.graphics.setDefaultFilter.
 * Isometric must be done, so it changes the tileset structure because tile must be drawned from up left to down right.
-* for orthogonal useful function must be divided in toRender(x) and to Render(y)
+* spritebatch capacity extended

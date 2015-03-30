@@ -1,70 +1,6 @@
-dofile("saveTableToFile.lua")
+require "persistence"
 
 tiolved={}
-
--- it create from xml file a table
-function tiolved:map(name)
-	local firstline = "<%?"
-	local object = "<[^/].*/>"
-	local begintable = "<[^/].*[^/]>"
-	local endtable= "</.*>"
-
-	local stack={}
-	local courant=1
-	local xml={}
-	stack[courant]=xml
-
-	local function readattribute(line)
-		local k, n, v
-		_,k,n=string.find(line, "%s(%w%w*)=")
-		if n then
-			line=string.sub(line,k+1)
-			_,k=string.find(line,".\"" )
-			v=string.sub(line,2,k-1)
-			line=string.sub(line,k+1)
-		end
-		return line,n,v
-	end
-
-	local function readline(line)
-		local object, objectname, k
-		_,k,objectname=string.find(line, "<(%w%w*)")
-		line=string.sub(line, k+1)
-
-		object={je=objectname}
-
-		local attr={n=nil,v=nil}
-		line,attr.n,attr.v=readattribute(line)
-		while attr.n and attr.v do
-			object[attr.n]=attr.v
-			line,attr.n,attr.v=readattribute(line)
-		end
-		return object
-	end
-
-	for line in love.filesystem.lines(name) do
-		if line == "</map>" then
-			return xml[1]
-		elseif string.find(line,firstline) then
-		elseif string.find(line,object) then
-			table.insert(stack[courant],readline(line))
-		elseif string.find(line,begintable) then
-			table.insert(stack[courant],readline(line))
-			stack[courant+1]=stack[courant][table.getn(stack[courant])]
-			courant=courant+1
-		elseif string.find(line,endtable) then
-			courant=courant-1
-		end
-	end
-end
-
--- store the map table a file
-function tiolved.store(map,filename)
-	return table.save(map,filename)
-end
-function tiolved.load(filename)
-	return table.load(filename)
-end
 
 -- array of table that contain
 -- canvas of the tile
@@ -72,7 +8,7 @@ end
 -- identifiers ( absolute like noted in layers )
 -- animation : array of {tileid,duration}
 -- I use it locally to gather information
-function tiolved:gid(map,rep)
+function tiolved.gid(map,rep)
 	-- save the previous blendmode because tile are drawned in "replace" mode in orderto keep alpha and note having a mixe with black
 	local previousblendmode=love.graphics.getBlendMode()
 	love.graphics.setBlendMode("replace")
@@ -80,51 +16,47 @@ function tiolved:gid(map,rep)
 	-- counter counts the tile in gid 
 	-- identical to absolute identifier
 	local counter=1
-	for _,m in ipairs(map) do
-		if m.je=="tileset" then
-			local tileset=m
-			-- import the image of the tileset in the repertory indicated
-			tileset.image=love.graphics.newImage(rep..tileset[1].source)
-			-- number of tile in width and in height, used to loop on them
-			local tileinwidth=math.floor(tileset[1].width/tileset.tilewidth)
-			local tileinheight=math.floor(tileset[1].height/tileset.tileheight)
-			for n = 1,tileinheight do
-				for m = 1,tileinwidth do
-					-- the information of each tile are going in this table
-					gid[counter]={id=counter}
-					-- the quad of the part of the image correspondant to the tile
-					local quad = love.graphics.newQuad((m-1)*tileset.tilewidth,(n-1)*tileset.tileheight,tileset.tilewidth,tileset.tileheight,tileset[1].width,tileset[1].height)
-					-- create the canvas that will contain the tile
-					local canvas = love.graphics.newCanvas(tileset.tilewidth,tileset.tileheight)
-					-- draw the quad of the image into the canvas
-					love.graphics.setCanvas (canvas)
-					love.graphics.draw(tileset.image,quad)
-					love.graphics.setCanvas()
-					
-					gid[counter].canvas=canvas
-					counter=counter+1
+--	for _,m in ipairs(map) do
+--		if m.je=="tileset" then
+	for _,tileset in ipairs(map.tilesets) do
+		-- import the image of the tileset in the repertory indicated
+		tileset.image=love.graphics.newImage(rep..tileset.image)
+		-- number of tile in width and in height, used to loop on them
+		local tileinwidth=math.floor(tileset.imagewidth/tileset.tilewidth)
+		local tileinheight=math.floor(tileset.imageheight/tileset.tileheight)
+		for n = 1,tileinheight do
+			for m = 1,tileinwidth do
+				-- the information of each tile are going in this table
+				gid[counter]={id=counter}
+				-- the quad of the part of the image correspondant to the tile
+				local quad = love.graphics.newQuad((m-1)*tileset.tilewidth,(n-1)*tileset.tileheight,tileset.tilewidth,tileset.tileheight,tileset.imagewidth,tileset.imageheight)
+				-- create the canvas that will contain the tile
+				local canvas = love.graphics.newCanvas(tileset.tilewidth,tileset.tileheight)
+				-- draw the quad of the image into the canvas
+				love.graphics.setCanvas (canvas)
+				love.graphics.draw(tileset.image,quad)
+				love.graphics.setCanvas()
+				
+				gid[counter].canvas=canvas
+				counter=counter+1
+			end
+		end
+
+		-- parse properties and aniation
+		for _,tile in ipairs(tileset.tiles) do
+			-- calculation of the identifier of the tile
+			local l=tonumber(tile.id)+tonumber(tileset.firstgid)
+			-- animation
+			if tile.animation then
+				gid[l].animation={}
+				for _,a in ipairs(tile.animation) do
+					table.insert(gid[l].animation,{tileid=tonumber(a.tileid)+tonumber(tileset.firstgid),duration=tonumber(a.duration)})
 				end
 			end
-
-			-- parse properties and aniation
-			for _,t in ipairs(tileset) do
-				if t.je=="tile" then
-					for _,k in ipairs(t) do
-						-- calculation of the identifier of the tile
-						local l=tonumber(t.id)+tonumber(tileset.firstgid)
-						-- animation
-						if k.je=="animation" then
-							gid[l].animation={}
-							for _,a in ipairs(k) do
-								table.insert(gid[l].animation,{tileid=tonumber(a.tileid)+tonumber(tileset.firstgid),duration=tonumber(a.duration)})
-							end
-						-- properties
-						elseif k.je=="properties" then
-							for _,p in ipairs(k) do
-								gid[l][p.name]=p.value
-							end
-						end
-					end
+			-- properties
+			if tile.properties then
+				for i,p in ipairs(tile.properties) do
+					gid[l][i]=p
 				end
 			end
 		end
@@ -165,7 +97,7 @@ end
 -- update(dt) : change the canvas of animated tile
 -- add( z, id, x, y, z, .. , kx, ky) : add a sprite in batch[z][id]
 -- draw() : draw and clear all spritebatch
-function tiolved:tileset(gid,map)
+function tiolved.tileset(gid,map)
 	local tileset={
 		animated={},
 		batch={},
@@ -243,51 +175,49 @@ end
 -- 	property1=value1
 -- 	property2=value2
 -- 	draw ( function that add tile in tileset batch )
-function tiolved:layers(map,tileset)
+function tiolved.layers(map,tileset)
 	local layers={}
 	local number=1
 	if map.orientation=="orthogonal" then
-		for _,v in ipairs(map) do
-			if v.je=="layer" then
-				local layer={
-					name=v.name,
-					number=number,
-					tile={}
-				}
-				j=1
-				-- properties
-				if v[j].je=="properties" then
-					for _,k in ipairs(v[j]) do
-						layer[k.name]=k.value
-					end
-					j=j+1
+		for _,v in ipairs(map.layers) do
+			local layer={
+				name=v.name,
+				number=number,
+				tile={}
+			}
+			-- properties
+			if v.properties then
+				for i,k in ipairs(v.properties) do
+					layer[i]=k
 				end
-				-- interpration of z property
-				if not layer.z then layer.z=number 
-				else layer.z=tonumber(layer.z)
-				end
-				-- data
-				for k,l in ipairs(v[j]) do
-					if l.gid~="0" then
-						local id=tonumber(l.gid)
-						local tileheight=tileset[id]:getHeight()
-						local pos={x=(k-1)%map.width*map.tilewidth,y=(math.ceil(k/map.width))*map.tileheight-tileheight}
-						tileset:add(layer.z,id,pos.x,pos.y)
-						table.insert(layer.tile,{id=id,x=pos.x,y=pos.y})
-					end
-				end
-				-- function to insert tiles of the layer in tileset.batch
-				function layer.draw()
-					for _,v in ipairs(layer.tile) do
-						tileset:add(layer.z,v.id,v.x,v.y)
-					end
-				end
-				-- insertion in a global table named layers
-				table.insert(layers,layer)
-				number=number+1
 			end
+
+			-- interpration of z property
+			if not layer.z then layer.z=number 
+			else layer.z=tonumber(layer.z)
+			end
+			
+			-- data
+			for k,l in ipairs(v.data) do
+				if l~=0 then
+					local id=l
+					local tileheight=tileset[id]:getHeight()
+					local pos={x=(k-1)%map.width*map.tilewidth,y=(math.ceil(k/map.width))*map.tileheight-tileheight}
+					tileset:add(layer.z,id,pos.x,pos.y)
+					table.insert(layer.tile,{id=id,x=pos.x,y=pos.y})
+				end
+			end
+
+			-- function to insert tiles of the layer in tileset.batch
+			function layer.draw()
+				for _,v in ipairs(layer.tile) do
+					tileset:add(layer.z,v.id,v.x,v.y)
+				end
+			end
+			-- insertion in a global table named layers
+			table.insert(layers,layer)
+			number=number+1
 		end
-	elseif map.orientation=="isometric" then
 	end
 	function layers:draw()
 		for _,v in ipairs(self) do
@@ -300,7 +230,7 @@ end
 -- two functions : toMap and toRender
 -- map coordinate are : 1 tile measure 1*1
 -- render coordinate are : 1 tile measure Xpixel*Ypixel
-function tiolved:usefulfunc(map)
+function tiolved.usefulfunc(map)
 	local toMap,toRender
 
 	if map.orientation=="orthogonal" then

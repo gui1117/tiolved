@@ -1,20 +1,19 @@
 require ("tiolved")
+require "persistence"
 
 function love.load()
 	local t=love.timer.getTime()
 	-- parsering tmx file to a lua table
-	local map=tiolved:map("source/orthogonal.tmx")
+	map=love.filesystem.load("source/orthogonal.lua")()
 	tloadmap=" time to load map="..love.timer.getTime()-t
-	tiolved.store(map,"source/orthogonal.lua")
-	local map= tiolved.load("source/orthogonal.lua")
 
 	-- creation of the gid, a local object full of data
-	local gid=tiolved:gid(map,"source/")
+	local gid=tiolved.gid(map,"source/")
 
 	-- creation of tileset, an object that animate tile (tileset:update(dt)) 
 	-- and draw tile stored in spritebatch (tileset:draw())
 	-- use tileset:add(...) to add tile in spritebatch
-	tileset=tiolved:tileset(gid,map)
+	tileset=tiolved.tileset(gid,map)
 
 	-- interpretation of interpreted layers
 	local toremove={} -- you must not remove in an array while looping in it
@@ -31,9 +30,9 @@ function love.load()
 	-- rendering of drawned layers
 	-- this object draws tile of layers in tileset spritebatch 
 	-- ( use layers:draw() )
-	layers=tiolved:layers(map,tileset)
+	layers=tiolved.layers(map,tileset)
 	-- useful function
-	toMap,toRender=tiolved:usefulfunc(map)
+	toMap,toRender=tiolved.usefulfunc(map)
 
 	-- creation of objects
 	-- if you want to use object layer of tiled
