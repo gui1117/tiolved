@@ -16,14 +16,14 @@ function love.load()
 
 	-- interpretation of interpreted layers
 	local toremove={} -- you must not remove in an array while looping in it
-	for i,v in ipairs (map) do
+	for i,v in ipairs (map.layers) do
 		if v.name=="collision" then
 			-- create.collision(v)
 			table.insert(toremove,i)
 		end
 	end
 	for _,v in ipairs(toremove) do
-		table.remove(map,v)
+		table.remove(map.layers,v)
 	end
 
 	-- rendering of drawned layers
@@ -32,23 +32,6 @@ function love.load()
 	layers=tiolved.layers(map,tileset)
 	-- useful function
 	toMap,toRender=tiolved.usefulfunc(map)
-
-	-- creation of objects
-	-- if you want to use object layer of tiled
-	for _,objectgroup in ipairs(map) do
-		if objectgroup.je=="objectgroup" then
-			for _,object in ipairs(objectgroup) do
-				local obj={}
-				for name,value in pairs(objectgroup) do
-					obj[name]=value
-				end
-				for name,value in pairs(object) do
-					obj[name]=value
-				end
-				-- create[objectgroup.name](obj)
-			end
-		end
-	end
 end
 
 function love.update(dt)
