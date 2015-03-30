@@ -139,14 +139,14 @@ function tiolved.tileset(gid,map)
 			end
 		end
 	end
-	local size=map.width*map.tilewidth,map.height*map.tileheight
+	local size=map.width*map.height
 	function tileset:add(z,id,x, y, r, sx, sy, ox, oy, kx, ky )
 		if not self.batch[z] then 
 			self.batch[z]={} 
 			table.insert(self.z,z)
 			table.sort(self.z)
 		end
-		if not self.batch[z][id] then self.batch[z][id]=love.graphics.newSpriteBatch(self[id],size) end
+		if not self.batch[z][id] then self.batch[z][id]=love.graphics.newSpriteBatch(self[id],size,"stream") end
 		self.batch[z][id]:add(x, y, r, sx, sy, ox, oy, kx, ky )
 	end
 	function tileset:draw()
