@@ -43,7 +43,7 @@ function tiolved.gid(map,rep)
 		-- parse properties and aniation
 		for _,tile in ipairs(tileset.tiles) do
 			-- calculation of the identifier of the tile
-			local l=tonumber(tile.id)+tonumber(tileset.firstgid)
+			local l=tile.id+tileset.firstgid
 			-- animation
 			if tile.animation then
 				gid[l].animation={}
@@ -53,7 +53,7 @@ function tiolved.gid(map,rep)
 			end
 			-- properties
 			if tile.properties then
-				for i,p in ipairs(tile.properties) do
+				for i,p in pairs(tile.properties) do
 					gid[l][i]=p
 				end
 			end
