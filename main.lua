@@ -1,5 +1,4 @@
 require ("tiolved")
-require "persistence"
 
 function love.load()
 	local t=love.timer.getTime()

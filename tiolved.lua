@@ -1,5 +1,3 @@
-require "persistence"
-
 tiolved={}
 
 -- array of table that contain
