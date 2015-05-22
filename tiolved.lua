@@ -203,14 +203,26 @@ function tiolved.layers(map,tileset)
 					local pos={x=(k-1)%map.width*map.tilewidth,y=(math.ceil(k/map.width))*map.tileheight-tileheight}
 					tileset:add(layer.z,id,pos.x,pos.y)
 					table.insert(layer.tile,{id=id,x=pos.x,y=pos.y})
+				else
+					table.insert(layer.tile,false)
 				end
 			end
 
 			-- function to insert tiles of the layer in tileset.batch
 			function layer.draw()
-				for _,v in ipairs(layer.tile) do
-					tileset:add(layer.z,v.id,v.x,v.y)
+				-- need the position of the camera
+				-- and the number of tile in height and in width
+				-- in order not to draw all tile
+				local cx,cy=camera.cx,camera.cy
+				for j=math.floor(cy-camera.tileinheight/2),math.ceil(cy+camera.tileinheight/2) do
+					for i=math.floor(cx-camera.tileinwidth/2),math.ceil(cx+camera.tileinwidth/2) do
+						local v=layer.tile[i+j*map.width]
+						if v then
+							tileset:add(layer.z,v.id,v.x,v.y)
+						end
+					end
 				end
+
 			end
 			-- insertion in a global table named layers
 			table.insert(layers,layer)
