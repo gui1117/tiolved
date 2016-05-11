@@ -1,9 +1,9 @@
 Tiölved.lua
 ===========
 
-[[ I no longer use it, may not works.
+**I no longer use it, may not works.
 See [STI](https://github.com/karai17/Simple-Tiled-Implementation) that seem to achieve the 
-same goal. ]]
+same goal.**
 
 A library to use [Tiled](http://www.mapeditor.org/) in [LÖVE](http://love2d.org).
 
